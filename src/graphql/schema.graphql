@@ -1,0 +1,63 @@
+## Queries
+## folders / folder(id)
+## bookmarks(folderId?, search?, take?, cursor?)
+
+## Mutations
+## createFolder / createBookmark
+## updateBookmark / deleteBookmark / moveBookmark
+
+## Types
+type Folder {
+  id: ID!
+  name: String!
+  createdAt: String!
+  bookmarks: [Bookmark!]!
+}
+
+type Bookmark {
+  id: ID!
+  title: String!
+  url: String!
+  tags: [String!]!
+  folderId: ID!
+  createdAt: String!
+}
+
+## Inputs
+input CreateFolderInput {
+    name: String!
+}
+
+input CreateBookmarkInput {
+  title: String!
+  url: String!
+  tags: [String!]!
+  folderId: ID!
+}
+
+input UpdateBookmarkInput {
+  title: String
+  url: String
+  tags: [String!]
+}
+
+
+## Operations
+type Query {
+  folders: [Folder!]!
+  folder(id: ID!): Folder!
+  bookmarks(
+    folderId: ID!,
+    search: String,
+    take: Int,
+    cursor: ID
+  ): [Bookmark!]!
+}
+
+type Mutation {
+   createFolder(i: CreateFolderInput): Folder!
+   createBookmark(i: CreateBookmarkInput): Bookmark!
+   updateBookmark(id: ID!, input: UpdateBookmarkInput!): Bookmark!
+   deleteBookmark(id: ID!): Bookmark!
+   moveBookmark(id: ID!, folderId: ID!): Bookmark!
+}
