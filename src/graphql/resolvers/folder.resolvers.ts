@@ -1,11 +1,18 @@
 import type { Folder } from "../../generated/prisma/client.ts";
 import type { GraphQLContext } from "../context.ts";
+import type { EmptyArgs } from "../resolvers/index.ts";
+import { notFound, parseId, requireInput } from "./helpers.ts";
 
 //------ Arguments
-type EmptyArgs = Record<string, never>;
 type FolderArgs = {
-    id: string;
-}
+  id: string;
+};
+
+type CreateFolderArgs = {
+  i: {
+    name: string;
+  } | null;
+};
 
 //------ Query
 const folders = (
@@ -18,20 +25,38 @@ const folders = (
   });
 };
 
-// need to check this out
-const folder = (
-    _parent: unknown,
-    _args: FolderArgs,
-    context: GraphQLContext,
+const folder = async (
+  _parent: unknown,
+  args: FolderArgs,
+  context: GraphQLContext,
 ) => {
-    const id = Number(_args.id);
+  const id = parseId(args.id, "id");
+  const result = await context.prisma.folder.findUnique({
+    where: { id },
+  });
 
-    return context.prisma.folder.findUnique({
-        where:{id: id},
-    })
-}
+  if (!result) {
+    return notFound("Folder");
+  }
+
+  return result;
+};
 
 //------ Mutations
+const createFolder = (
+  _parent: unknown,
+  args: CreateFolderArgs,
+  context: GraphQLContext,
+) => {
+  const input = requireInput(args.i, "i");
+
+  return context.prisma.folder.create({
+    data: {
+      name: input.name,
+    },
+  });
+};
+
 
 //------ Type Operations
 const bookmarks = (
@@ -53,6 +78,10 @@ export const folderResolvers = {
   Query: {
     folders,
     folder,
+  },
+
+  Mutation: {
+    createFolder,
   },
 
   Folder: {

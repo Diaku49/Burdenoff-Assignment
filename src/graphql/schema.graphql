@@ -47,7 +47,7 @@ type Query {
   folders: [Folder!]!
   folder(id: ID!): Folder!
   bookmarks(
-    folderId: ID!,
+    folderId: ID,
     search: String,
     take: Int,
     cursor: ID
