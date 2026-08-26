@@ -61,3 +61,35 @@ export function notFound(resource: "Bookmark" | "Folder"): never {
     extensions: { code: "NOT_FOUND" },
   });
 }
+
+export function validateTake(take:number): number {
+  try {
+    if (take < 0 || take === 0) {
+      throw new Error("Nagative or Zero Take is not permitted")
+    }
+    if (take > 100) {
+      throw new Error("Take cannot be bigger than 100")
+    } 
+
+    return take
+  } catch{
+    throw new GraphQLError("Take must be a valid number", {
+      extensions: {code:"BAD_USER_INPUT"}
+    })
+  }
+}
+
+export function validateFolderName(name: string): string {
+  try {
+    const trimName = name.trim();
+    if (!trimName) {
+      throw new Error("Empty name")
+    }
+
+    return trimName
+  } catch {
+    throw new GraphQLError("Invalid folder name", {
+      extensions: {code:"BAD_USER_INPUT"}
+    })
+  }
+}

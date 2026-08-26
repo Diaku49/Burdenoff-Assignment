@@ -1,7 +1,7 @@
 import type { Folder } from "../../generated/prisma/client.ts";
 import type { GraphQLContext } from "../context.ts";
 import type { EmptyArgs } from "../resolvers/index.ts";
-import { notFound, parseId, requireInput } from "./helpers.ts";
+import { notFound, parseId, requireInput, validateFolderName } from "./helpers.ts";
 
 //------ Arguments
 type FolderArgs = {
@@ -45,8 +45,9 @@ const createFolder = (
   context: GraphQLContext,
 ) => {
   const input = requireInput(args.input, "input");
+  const folderName = validateFolderName(input.name)
 
-  return context.repositories.folders.create(input.name);
+  return context.repositories.folders.create(folderName);
 };
 
 

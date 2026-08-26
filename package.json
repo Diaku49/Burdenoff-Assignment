@@ -7,6 +7,9 @@
     "dev": "bun --watch src/index.ts",
     "start": "bun src/index.ts",
     "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "test:unit": "bun test tests/unit",
+    "test:integration": "bun test tests/integration",
     "gendb": "bunx --bun prisma generate",
     "db:migrate": "bunx --bun prisma migrate deploy"
   },

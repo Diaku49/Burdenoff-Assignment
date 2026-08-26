@@ -8,6 +8,7 @@ import {
   notFound,
   parseId,
   requireInput,
+  validateTake,
   validateTitle,
   validateUrl,
 } from "./helpers.ts";
@@ -74,8 +75,13 @@ const bookmarks = (
   args: Bookmarks,
   context: GraphQLContext,
 ) => {
+  let take
+  if (args.take !== undefined && args.take !== null) {
+    take = validateTake(args.take)
+  }
+
   const options: BookmarkQueryOptions = {
-    take: args.take ?? 15,
+    take: take ?? 15,
   };
 
   if (args.folderId) {
