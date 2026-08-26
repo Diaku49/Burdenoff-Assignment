@@ -20,9 +20,7 @@ const folders = (
   _args: EmptyArgs,
   context: GraphQLContext,
 ) => {
-  return context.prisma.folder.findMany({
-    orderBy: { id: "asc" },
-  });
+  return context.repositories.folders.findAll();
 };
 
 const folder = async (
@@ -31,9 +29,7 @@ const folder = async (
   context: GraphQLContext,
 ) => {
   const id = parseId(args.id, "id");
-  const result = await context.prisma.folder.findUnique({
-    where: { id },
-  });
+  const result = await context.repositories.folders.findById(id);
 
   if (!result) {
     return notFound("Folder");
@@ -50,11 +46,7 @@ const createFolder = (
 ) => {
   const input = requireInput(args.input, "input");
 
-  return context.prisma.folder.create({
-    data: {
-      name: input.name,
-    },
-  });
+  return context.repositories.folders.create(input.name);
 };
 
 
@@ -64,10 +56,7 @@ const bookmarks = (
   _args: EmptyArgs,
   context: GraphQLContext,
 ) => {
-  return context.prisma.bookmark.findMany({
-    where: { folderId: folder.id },
-    orderBy: { id: "asc" },
-  });
+  return context.repositories.bookmarks.findByFolderId(folder.id);
 };
 
 const createdAt = (folder: Folder): string => {

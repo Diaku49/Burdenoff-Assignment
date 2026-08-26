@@ -1,4 +1,8 @@
-import type { Bookmark, Prisma } from "../../generated/prisma/client.ts";
+import type { Bookmark } from "../../generated/prisma/client.ts";
+import type {
+  BookmarkQueryOptions,
+  UpdateBookmarkData,
+} from "../../repositories/repository.types.ts";
 import type { GraphQLContext } from "../context.ts";
 import {
   notFound,
@@ -45,9 +49,7 @@ type MoveBookmarkArgs = {
 
 //------ Functions
 async function getBookmarkOrThrow(context: GraphQLContext, id: number) {
-  const bookmark = await context.prisma.bookmark.findUnique({
-    where: { id },
-  });
+  const bookmark = await context.repositories.bookmarks.findById(id);
 
   if (!bookmark) {
     return notFound("Bookmark");
@@ -57,9 +59,7 @@ async function getBookmarkOrThrow(context: GraphQLContext, id: number) {
 }
 
 async function getFolderOrThrow(context: GraphQLContext, id: number) {
-  const folder = await context.prisma.folder.findUnique({
-    where: { id },
-  });
+  const folder = await context.repositories.folders.findById(id);
 
   if (!folder) {
     return notFound("Folder");
@@ -69,34 +69,31 @@ async function getFolderOrThrow(context: GraphQLContext, id: number) {
 }
 
 //------ Query
-const bookmarks = async (
-    _parent: unknown,
-    args: Bookmarks,
-    context: GraphQLContext,
+const bookmarks = (
+  _parent: unknown,
+  args: Bookmarks,
+  context: GraphQLContext,
 ) => {
-    const where: Prisma.BookmarkWhereInput = {};
-    if (args.folderId) {
-        where.folderId = parseId(args.folderId, "folderId");
-    }
-    if (args.search) {
-        where.title = {
-            contains: args.search.trim(),
-            mode: "insensitive",
-        }
-    }
-    
-    const filter: Prisma.BookmarkFindManyArgs = {
-        where,
-        orderBy:{id: "asc" as const},
-        take: args.take ?? 15,
-    }
-    if (args.cursor) {
-        filter.cursor = {id: parseId(args.cursor, "cursor")}
-        filter.skip = 1;
-    }
+  const options: BookmarkQueryOptions = {
+    take: args.take ?? 15,
+  };
 
-    return context.prisma.bookmark.findMany(filter);
-}
+  if (args.folderId) {
+    options.folderId = parseId(args.folderId, "folderId");
+  }
+
+  const search = args.search?.trim();
+
+  if (search) {
+    options.search = search;
+  }
+
+  if (args.cursor) {
+    options.cursor = parseId(args.cursor, "cursor");
+  }
+
+  return context.repositories.bookmarks.findMany(options);
+};
 
 //------ Mutations
 const createBookmark = async (
@@ -109,13 +106,11 @@ const createBookmark = async (
 
   await getFolderOrThrow(context, folderId);
 
-  return context.prisma.bookmark.create({
-    data: {
-      title: validateTitle(input.title),
-      url: validateUrl(input.url),
-      tags: input.tags,
-      folderId,
-    },
+  return context.repositories.bookmarks.create({
+    title: validateTitle(input.title),
+    url: validateUrl(input.url),
+    tags: input.tags,
+    folderId,
   });
 };
 
@@ -125,11 +120,7 @@ const updateBookmark = async (
   context: GraphQLContext,
 ) => {
   const id = parseId(args.id, "id");
-  const data: {
-    title?: string;
-    url?: string;
-    tags?: string[];
-  } = {};
+  const data: UpdateBookmarkData = {};
 
   if (args.input.title !== undefined && args.input.title !== null) {
     data.title = validateTitle(args.input.title);
@@ -149,10 +140,7 @@ const updateBookmark = async (
 
   await getBookmarkOrThrow(context, id);
 
-  return context.prisma.bookmark.update({
-    where: { id },
-    data,
-  });
+  return context.repositories.bookmarks.update(id, data);
 };
 
 const deleteBookmark = async (
@@ -164,9 +152,7 @@ const deleteBookmark = async (
 
   await getBookmarkOrThrow(context, id);
 
-  return context.prisma.bookmark.delete({
-    where: { id },
-  });
+  return context.repositories.bookmarks.delete(id);
 };
 
 const moveBookmark = async (
@@ -180,10 +166,7 @@ const moveBookmark = async (
   await getBookmarkOrThrow(context, id);
   await getFolderOrThrow(context, folderId);
 
-  return context.prisma.bookmark.update({
-    where: { id },
-    data: { folderId },
-  });
+  return context.repositories.bookmarks.move(id, folderId);
 };
 
 //Type Operations
