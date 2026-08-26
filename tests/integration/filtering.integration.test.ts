@@ -93,4 +93,53 @@ describe("bookmark filtering and search", () => {
     ).bookmarks;
     expect(urlFragment).toEqual([]);
   });
+
+  test("search treats LIKE wildcards as literal characters", async () => {
+    const folderId = await suite.createFolder(suite.uniqueName("Wildcards"));
+
+    await suite.createBookmark(
+      folderId,
+      "100% coverage",
+      "https://example.com/coverage",
+    );
+    await suite.createBookmark(
+      folderId,
+      "snake_case naming",
+      "https://example.com/naming",
+    );
+    await suite.createBookmark(
+      folderId,
+      "Plain title",
+      "https://example.com/plain",
+    );
+
+    const percent = expectData(
+      await execute<{ bookmarks: BookmarkPayload[] }>(BOOKMARKS, {
+        folderId,
+        search: "%",
+      }),
+    ).bookmarks;
+    expect(percent.map((bookmark) => bookmark.title)).toEqual([
+      "100% coverage",
+    ]);
+
+    const underscoreLiteral = expectData(
+      await execute<{ bookmarks: BookmarkPayload[] }>(BOOKMARKS, {
+        folderId,
+        search: "snake_case",
+      }),
+    ).bookmarks;
+    expect(underscoreLiteral.map((bookmark) => bookmark.title)).toEqual([
+      "snake_case naming",
+    ]);
+
+    // "Pla_n" only matches "Plain" if _ is treated as a wildcard.
+    const underscoreWildcard = expectData(
+      await execute<{ bookmarks: BookmarkPayload[] }>(BOOKMARKS, {
+        folderId,
+        search: "Pla_n",
+      }),
+    ).bookmarks;
+    expect(underscoreWildcard).toEqual([]);
+  });
 });

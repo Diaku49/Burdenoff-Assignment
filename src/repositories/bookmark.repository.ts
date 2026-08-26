@@ -10,6 +10,10 @@ import type {
   UpdateBookmarkData,
 } from "./repository.types.ts";
 
+function escapeLikePattern(term: string): string {
+  return term.replace(/[\\%_]/g, (character) => `\\${character}`);
+}
+
 export class PrismaBookmarkRepository implements BookmarkRepository {
   private readonly prisma: PrismaClient;
 
@@ -26,7 +30,7 @@ export class PrismaBookmarkRepository implements BookmarkRepository {
 
     if (options.search !== undefined) {
       where.title = {
-        contains: options.search,
+        contains: escapeLikePattern(options.search),
         mode: "insensitive",
       };
     }
