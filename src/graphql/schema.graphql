@@ -55,8 +55,8 @@ type Query {
 }
 
 type Mutation {
-   createFolder(i: CreateFolderInput): Folder!
-   createBookmark(i: CreateBookmarkInput): Bookmark!
+   createFolder(input: CreateFolderInput!): Folder!
+   createBookmark(input: CreateBookmarkInput!): Bookmark!
    updateBookmark(id: ID!, input: UpdateBookmarkInput!): Bookmark!
    deleteBookmark(id: ID!): Bookmark!
    moveBookmark(id: ID!, folderId: ID!): Bookmark!

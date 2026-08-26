@@ -1,11 +1,11 @@
-import type { PrismaClient } from "../generated/prisma/client.ts";
+import type { Repositories } from "../repositories/repository.types.ts";
 
 export type GraphQLContext = {
-  prisma: PrismaClient;
+  repositories: Repositories;
 };
 
 export function createGraphQLContext(
-  prisma: PrismaClient,
+  repositories: Repositories,
 ): GraphQLContext {
-  return { prisma };
+  return { repositories };
 }
