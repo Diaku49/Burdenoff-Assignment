@@ -17,7 +17,7 @@ type Bookmarks = {
 }
 
 type CreateBookmarkArgs = {
-  i: {
+  input: {
     title: string;
     url: string;
     tags: string[];
@@ -104,7 +104,7 @@ const createBookmark = async (
   args: CreateBookmarkArgs,
   context: GraphQLContext,
 ) => {
-  const input = requireInput(args.i, "i");
+  const input = requireInput(args.input, "input");
   const folderId = parseId(input.folderId, "folderId");
 
   await getFolderOrThrow(context, folderId);

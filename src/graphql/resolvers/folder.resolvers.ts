@@ -9,7 +9,7 @@ type FolderArgs = {
 };
 
 type CreateFolderArgs = {
-  i: {
+  input: {
     name: string;
   } | null;
 };
@@ -48,7 +48,7 @@ const createFolder = (
   args: CreateFolderArgs,
   context: GraphQLContext,
 ) => {
-  const input = requireInput(args.i, "i");
+  const input = requireInput(args.input, "input");
 
   return context.prisma.folder.create({
     data: {
